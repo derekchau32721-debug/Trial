@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(180deg);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .tab-btn {
+            padding: 16px 30px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: #333;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px 40px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: #f0f0f0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th {
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background: #e8e8e8;
+        }
+
+        th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        th.sorted-asc::after {
+            content: ' ▲';
+            opacity: 1;
+            color: #667eea;
+        }
+
+        th.sorted-desc::after {
+            content: ' ▼';
+            opacity: 1;
+            color: #667eea;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        td {
+            padding: 14px 12px;
+            color: #333;
+        }
+
+        .positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .neutral {
+            color: #6b7280;
+        }
+
+        .sector-cell {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .ticker {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .price {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            color: #1e3c72;
+        }
+
+        .sparkline {
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+        }
+
+        .flag {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .location-name {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .index-name {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header-left h1 {
+                font-size: 24px;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .tab-btn {
+                padding: 12px 20px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>Market Dashboard</h1>
+                <p>SPDR Sectors & Global Indices</p>
+            </div>
+            <div class="header-right">
+                <div class="timestamp">Last updated: <span id="timestamp"></span></div>
+                <button class="refresh-btn" id="refreshBtn">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="sectors">Sectors</button>
+            <button class="tab-btn" data-tab="locations">Locations</button>
+        </div>
+
+        <!-- Sectors Tab -->
+        <div id="sectors" class="tab-content active">
+            <div class="table-wrapper">
+                <table id="sectorsTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="sector">Sector</th>
+                            <th class="sortable" data-sort="ticker">ETF Ticker</th>
+                            <th class="sortable" data-sort="price">Price</th>
+                            <th class="sortable" data-sort="daily">Daily %</th>
+                            <th class="sortable" data-sort="weekly">Weekly %</th>
+                            <th class="sortable" data-sort="monthly">Monthly %</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sectorsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Locations Tab -->
+        <div id="locations" class="tab-content">
+            <div class="table-wrapper">
+                <table id="locationsTable">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th class="sortable" data-sort="ticker">Ticker</th>
+                            <th class="sortable" data-sort="name">Index Name</th>
+                            <th class="sortable" data-sort="price">Price</th>
+                            <th class="sortable" data-sort="daily">Daily %</th>
+                            <th class="sortable" data-sort="weekly">Weekly %</th>
+                            <th class="sortable" data-sort="monthly">Monthly %</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="locationsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data for Sectors
+        const sectorsData = [
+            { sector: 'Technology', ticker: 'XLK', price: 162.45, daily: 1.23, weekly: 3.45, monthly: 8.92, sparkline: [155, 158, 160, 159, 162] },
+            { sector: 'Health Care', ticker: 'XLV', price: 138.72, daily: -0.45, weekly: 2.10, monthly: 5.23, sparkline: [135, 136, 138, 138, 139] },
+            { sector: 'Financials', ticker: 'XLF', price: 41.83, daily: 0.88, weekly: 1.92, monthly: 4.56, sparkline: [40, 40.5, 41, 41.5, 42] },
+            { sector: 'Consumer Discretionary', ticker: 'XLY', price: 79.45, daily: 0.56, weekly: -1.23, monthly: 3.21, sparkline: [76, 77, 78, 79, 79.5] },
+            { sector: 'Industrials', ticker: 'XLI', price: 102.18, daily: 1.12, weekly: 2.45, monthly: 6.78, sparkline: [98, 99, 100, 101, 102] },
+            { sector: 'Communication Services', ticker: 'XLC', price: 66.92, daily: 0.34, weekly: 1.56, monthly: 4.89, sparkline: [64, 65, 66, 66.5, 67] },
+            { sector: 'Energy', ticker: 'XLE', price: 87.34, daily: -1.45, weekly: -3.21, monthly: -8.45, sparkline: [98, 95, 92, 90, 87] },
+            { sector: 'Consumer Staples', ticker: 'XLP', price: 77.56, daily: -0.23, weekly: 0.78, monthly: 2.15, sparkline: [76, 76.5, 77, 77.2, 77.5] },
+            { sector: 'Materials', ticker: 'XLB', price: 97.23, daily: 1.78, weekly: 2.34, monthly: 7.89, sparkline: [92, 94, 95, 96, 97] },
+            { sector: 'Real Estate', ticker: 'XLRE', price: 61.45, daily: -0.89, weekly: -0.45, monthly: 1.23, sparkline: [62, 61.5, 61.2, 61.3, 61.5] },
+            { sector: 'Utilities', ticker: 'XLU', price: 72.18, daily: 0.12, weekly: 0.45, monthly: -0.78, sparkline: [73, 72.5, 72.2, 72.1, 72.2] }
+        ];
+
+        // Sample Data for Locations
+        const locationsData = [
+            { flag: '🇺🇸', location: 'United States', ticker: '^GSPC', name: 'S&P 500', price: 5847.23, daily: 0.85, weekly: 2.34, monthly: 6.78, sparkline: [5600, 5650, 5750, 5800, 5847] },
+            { flag: '🇯🇵', location: 'Japan', ticker: '^N225', name: 'Nikkei 225', price: 28654.12, daily: 1.45, weekly: 3.21, monthly: 8.45, sparkline: [27500, 28000, 28200, 28500, 28654] },
+            { flag: '🇹🇼', location: 'Taiwan', ticker: '^TWII', name: 'TAIEX', price: 21834.56, daily: 0.92, weekly: 2.15, monthly: 7.23, sparkline: [21000, 21300, 21600, 21800, 21835] },
+            { flag: '🇭🇰', location: 'Hong Kong', ticker: '^HSI', name: 'Hang Seng', price: 17456.78, daily: -0.45, weekly: 1.23, monthly: 3.21, sparkline: [17600, 17500, 17450, 17480, 17457] },
+            { flag: '🇨🇳', location: 'China', ticker: '000001.SS', name: 'SSE Composite', price: 3245.67, daily: 0.23, weekly: 0.89, monthly: 2.15, sparkline: [3180, 3200, 3230, 3240, 3246] },
+            { flag: '🇫🇷', location: 'France', ticker: '^FCHI', name: 'CAC 40', price: 7823.45, daily: 0.67, weekly: 1.92, monthly: 5.34, sparkline: [7600, 7650, 7750, 7800, 7823] },
+            { flag: '🇩🇪', location: 'Germany', ticker: '^GDAXI', name: 'DAX', price: 18234.56, daily: 0.45, weekly: 1.56, monthly: 4.23, sparkline: [17800, 17900, 18000, 18150, 18235] },
+            { flag: '🇬🇧', location: 'United Kingdom', ticker: '^FTSE', name: 'FTSE 100', price: 8156.34, daily: -0.12, weekly: 0.78, monthly: 2.45, sparkline: [8200, 8180, 8160, 8160, 8156] },
+            { flag: '🇮🇳', location: 'India', ticker: '^NSEI', name: 'Nifty 50', price: 24567.89, daily: 1.23, weekly: 2.45, monthly: 9.87, sparkline: [23400, 23800, 24100, 24300, 24568] },
+            { flag: '🇰🇷', location: 'South Korea', ticker: '^KS11', name: 'KOSPI', price: 2834.56, daily: 0.78, weekly: 1.45, monthly: 4.56, sparkline: [2750, 2780, 2800, 2820, 2835] },
+            { flag: '🇦🇺', location: 'Australia', ticker: '^AXJO', name: 'ASX 200', price: 7654.32, daily: 0.34, weekly: 1.12, monthly: 3.78, sparkline: [7450, 7500, 7550, 7620, 7654] },
+            { flag: '🇧🇷', location: 'Brazil', ticker: '^BVSP', name: 'Bovespa', price: 134567.89, daily: -1.23, weekly: -0.45, monthly: 5.23, sparkline: [130000, 131000, 133000, 134000, 134568] }
+        ];
+
+        // Utility function to generate simple SVG sparkline
+        function createSparklineSVG(data) {
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const range = max - min || 1;
+            const width = 50;
+            const height = 30;
+            const padding = 2;
+            
+            let points = '';
+            data.forEach((value, index) => {
+                const x = padding + (index / (data.length - 1)) * (width - 2 * padding);
+                const y = height - padding - ((value - min) / range) * (height - 2 * padding);
+                points += `${x},${y} `;
+            });
+
+            const svg = `<svg class="sparkline" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="${points}" fill="none" stroke="#667eea" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+                <circle cx="${padding + 4 * (width - 2 * padding) / 4}" cy="${height - padding - ((data[data.length - 1] - min) / range) * (height - 2 * padding)}" r="2" fill="#667eea"/>
+            </svg>`;
+            return svg;
+        }
+
+        // Format currency
+        function formatCurrency(value, decimals = 2) {
+            return value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // Get color class
+        function getColorClass(value) {
+            if (value > 0) return 'positive';
+            if (value < 0) return 'negative';
+            return 'neutral';
+        }
+
+        // Render sectors table
+        function renderSectorsTable(data) {
+            const tbody = document.getElementById('sectorsTableBody');
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td class="sector-cell">${item.sector}</td>
+                    <td><span class="ticker">${item.ticker}</span></td>
+                    <td class="price">$${formatCurrency(item.price, 2)}</td>
+                    <td class="${getColorClass(item.daily)}">${item.daily > 0 ? '+' : ''}${item.daily.toFixed(2)}%</td>
+                    <td class="${getColorClass(item.weekly)}">${item.weekly > 0 ? '+' : ''}${item.weekly.toFixed(2)}%</td>
+                    <td class="${getColorClass(item.monthly)}">${item.monthly > 0 ? '+' : ''}${item.monthly.toFixed(2)}%</td>
+                    <td>${createSparklineSVG(item.sparkline)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Render locations table
+        function renderLocationsTable(data) {
+            const tbody = document.getElementById('locationsTableBody');
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td><span class="flag">${item.flag}</span><span class="location-name">${item.location}</span></td>
+                    <td><span class="ticker">${item.ticker}</span></td>
+                    <td><span class="index-name">${item.name}</span></td>
+                    <td class="price">$${formatCurrency(item.price, 2)}</td>
+                    <td class="${getColorClass(item.daily)}">${item.daily > 0 ? '+' : ''}${item.daily.toFixed(2)}%</td>
+                    <td class="${getColorClass(item.weekly)}">${item.weekly > 0 ? '+' : ''}${item.weekly.toFixed(2)}%</td>
+                    <td class="${getColorClass(item.monthly)}">${item.monthly > 0 ? '+' : ''}${item.monthly.toFixed(2)}%</td>
+                    <td>${createSparklineSVG(item.sparkline)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Remove active class from all buttons
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Show selected tab
+                document.getElementById(tabName).classList.add('active');
+                btn.classList.add('active');
+            });
+        });
+
+        // Sorting functionality
+        function setupTableSorting(tableId, dataArray, renderFunction) {
+            const table = document.getElementById(tableId);
+            const headers = table.querySelectorAll('th.sortable');
+            
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortKey = header.dataset.sort;
+                    let isAscending = true;
+                    
+                    // Check if already sorted
+                    if (header.classList.contains('sorted-asc')) {
+                        isAscending = false;
+                        header.classList.remove('sorted-asc');
+                        header.classList.add('sorted-desc');
+                    } else {
+                        header.classList.remove('sorted-desc');
+                        header.classList.add('sorted-asc');
+                    }
+                    
+                    // Remove sorted classes from other headers
+                    headers.forEach(h => {
+                        if (h !== header) {
+                            h.classList.remove('sorted-asc', 'sorted-desc');
+                        }
+                    });
+                    
+                    // Sort data
+                    dataArray.sort((a, b) => {
+                        let aVal = a[sortKey];
+                        let bVal = b[sortKey];
+                        
+                        if (typeof aVal === 'string') {
+                            aVal = aVal.toLowerCase();
+                            bVal = bVal.toLowerCase();
+                        }
+                        
+                        if (isAscending) {
+                            return aVal > bVal ? 1 : -1;
+                        } else {
+                            return aVal < bVal ? 1 : -1;
+                        }
+                    });
+                    
+                    // Re-render table
+                    renderFunction(dataArray);
+                });
+            });
+        }
+
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            updateTimestamp();
+            // Add slight rotation animation
+            const btn = document.getElementById('refreshBtn');
+            btn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                btn.style.transform = 'rotate(0deg)';
+            }, 600);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTimestamp();
+            renderSectorsTable(sectorsData);
+            renderLocationsTable(locationsData);
+            setupTableSorting('sectorsTable', sectorsData, renderSectorsTable);
+            setupTableSorting('locationsTable', locationsData, renderLocationsTable);
+        });
+    </script>
+</body>
+</html>
