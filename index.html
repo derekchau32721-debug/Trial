@@ -3,26 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Page</title>
+    <title>Derek Love</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 25%, #ffc0cb 50%, #ff1493 75%, #ff69b4 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            font-family: 'Georgia', serif;
             color: #ffffff;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            position: relative;
+            text-align: center;
+            z-index: 10;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         h1 {
-            font-size: 4rem;
-            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 5rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                         0 0 40px rgba(255, 20, 147, 0.6),
+                         0 0 60px rgba(255, 105, 180, 0.4);
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            animation: glow 3s ease-in-out infinite;
         }
+
+        @keyframes glow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                             0 0 40px rgba(255, 20, 147, 0.6),
+                             0 0 60px rgba(255, 105, 180, 0.4);
+            }
+            50% { 
+                text-shadow: 0 0 30px rgba(255, 255, 255, 1),
+                             0 0 60px rgba(255, 20, 147, 0.8),
+                             0 0 100px rgba(255, 105, 180, 0.6);
+            }
+        }
+
+        .subtitle {
+            font-size: 2.5rem;
+            font-style: italic;
+            margin-top: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Floating hearts */
+        .heart {
+            position: absolute;
+            font-size: 2rem;
+            animation: float-hearts 6s ease-in infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes float-hearts {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .heart1 { left: 10%; animation-delay: 0s; font-size: 2.5rem; }
+        .heart2 { left: 20%; animation-delay: 1s; font-size: 2rem; }
+        .heart3 { left: 30%; animation-delay: 2s; font-size: 3rem; }
+        .heart4 { left: 40%; animation-delay: 0.5s; font-size: 2.2rem; }
+        .heart5 { left: 50%; animation-delay: 1.5s; font-size: 2.8rem; }
+        .heart6 { left: 60%; animation-delay: 2.5s; font-size: 2rem; }
+        .heart7 { left: 70%; animation-delay: 0.8s; font-size: 3.2rem; }
+        .heart8 { left: 80%; animation-delay: 1.8s; font-size: 2.4rem; }
+        .heart9 { left: 90%; animation-delay: 2.2s; font-size: 2.6rem; }
     </style>
 </head>
 <body>
-    <h1>Hello</h1>
+    <div class="heart heart1">💕</div>
+    <div class="heart heart2">❤️</div>
+    <div class="heart heart3">💖</div>
+    <div class="heart heart4">💗</div>
+    <div class="heart heart5">💝</div>
+    <div class="heart heart6">💕</div>
+    <div class="heart heart7">❤️</div>
+    <div class="heart heart8">💖</div>
+    <div class="heart heart9">💗</div>
+
+    <div class="container">
+        <h1>Derek ❤️</h1>
+        <p class="subtitle">Love SMH</p>
+    </div>
 </body>
 </html>
