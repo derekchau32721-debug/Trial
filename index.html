@@ -1,127 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Derek Love</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Derek Love</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.22), transparent 20%),
+                  linear-gradient(135deg, #ff4fa1 0%, #ff9dd7 40%, #7c3aed 100%);
+      color: white;
+      overflow-x: hidden;
+    }
 
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 25%, #ffc0cb 50%, #ff1493 75%, #ff69b4 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite;
-            font-family: 'Georgia', serif;
-            color: #ffffff;
-            overflow: hidden;
-        }
+    #heart-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    .heart {
+      position: absolute;
+      will-change: transform, opacity;
+      animation: float-up 10s linear infinite;
+      opacity: 0;
+      font-size: 1.8rem;
+      text-shadow: 0 0 24px rgba(255, 255, 255, 0.65);
+    }
 
-        .container {
-            position: relative;
-            text-align: center;
-            z-index: 10;
-            animation: pulse 2s ease-in-out infinite;
-        }
+    @keyframes float-up {
+      0% {
+        transform: translateY(0) scale(0.7);
+        opacity: 0;
+      }
+      15% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-130vh) rotate(720deg) scale(1.1);
+        opacity: 0;
+      }
+    }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        h1 {
-            font-size: 5rem;
-            font-weight: bold;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                         0 0 40px rgba(255, 20, 147, 0.6),
-                         0 0 60px rgba(255, 105, 180, 0.4);
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            animation: glow 3s ease-in-out infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% { 
-                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                             0 0 40px rgba(255, 20, 147, 0.6),
-                             0 0 60px rgba(255, 105, 180, 0.4);
-            }
-            50% { 
-                text-shadow: 0 0 30px rgba(255, 255, 255, 1),
-                             0 0 60px rgba(255, 20, 147, 0.8),
-                             0 0 100px rgba(255, 105, 180, 0.6);
-            }
-        }
-
-        .subtitle {
-            font-size: 2.5rem;
-            font-style: italic;
-            margin-top: 20px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        /* Floating hearts */
-        .heart {
-            position: absolute;
-            font-size: 2rem;
-            animation: float-hearts 6s ease-in infinite;
-            opacity: 0.8;
-        }
-
-        @keyframes float-hearts {
-            0% {
-                transform: translateY(100vh) translateX(0) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .heart1 { left: 10%; animation-delay: 0s; font-size: 2.5rem; }
-        .heart2 { left: 20%; animation-delay: 1s; font-size: 2rem; }
-        .heart3 { left: 30%; animation-delay: 2s; font-size: 3rem; }
-        .heart4 { left: 40%; animation-delay: 0.5s; font-size: 2.2rem; }
-        .heart5 { left: 50%; animation-delay: 1.5s; font-size: 2.8rem; }
-        .heart6 { left: 60%; animation-delay: 2.5s; font-size: 2rem; }
-        .heart7 { left: 70%; animation-delay: 0.8s; font-size: 3.2rem; }
-        .heart8 { left: 80%; animation-delay: 1.8s; font-size: 2.4rem; }
-        .heart9 { left: 90%; animation-delay: 2.2s; font-size: 2.6rem; }
-    </style>
+    .glow-text {
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.6),
+                   0 0 60px rgba(236, 72, 153, 0.45),
+                   0 0 90px rgba(139, 92, 246, 0.3);
+    }
+  </style>
 </head>
-<body>
-    <div class="heart heart1">💕</div>
-    <div class="heart heart2">❤️</div>
-    <div class="heart heart3">💖</div>
-    <div class="heart heart4">💗</div>
-    <div class="heart heart5">💝</div>
-    <div class="heart heart6">💕</div>
-    <div class="heart heart7">❤️</div>
-    <div class="heart heart8">💖</div>
-    <div class="heart heart9">💗</div>
+<body class="relative font-sans">
+  <div id="heart-burst"></div>
 
-    <div class="container">
-        <h1>Derek ❤️</h1>
-        <p class="subtitle">Love SMH</p>
-    </div>
+  <main class="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-6 py-10">
+    <section class="w-full rounded-[32px] border border-white/10 bg-white/10 p-8 shadow-2xl shadow-fuchsia-900/20 backdrop-blur-xl">
+      <div class="grid gap-8 lg:grid-cols-[1.8fr_1fr]">
+        <article class="space-y-6">
+          <span class="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-pink-100 shadow-sm shadow-white/10">Tailwind + JavaScript</span>
+          <div class="space-y-4">
+            <h1 class="text-5xl font-black tracking-[-0.04em] text-white sm:text-6xl glow-text">Derek <span class="text-pink-300">❤️</span></h1>
+            <p class="max-w-2xl text-lg leading-8 text-white/80">A smoother, modern landing page with Tailwind CSS styling and interactive browser behavior powered by vanilla JavaScript.</p>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <div class="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-xl shadow-pink-500/10">
+              <p class="text-xs uppercase tracking-[0.28em] text-pink-200">Mood</p>
+              <p class="mt-4 text-3xl font-semibold text-white">Romantic</p>
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-xl shadow-violet-500/10">
+              <p class="text-xs uppercase tracking-[0.28em] text-violet-200">Energy</p>
+              <p class="mt-4 text-3xl font-semibold text-white">Sparkling</p>
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-xl shadow-cyan-500/10">
+              <p class="text-xs uppercase tracking-[0.28em] text-cyan-200">Style</p>
+              <p class="mt-4 text-3xl font-semibold text-white">Dynamic</p>
+            </div>
+          </div>
+        </article>
+
+        <aside class="space-y-6 rounded-[32px] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/40">
+          <div class="space-y-3">
+            <h2 class="text-2xl font-semibold text-white">Interactive Love Board</h2>
+            <p class="text-sm leading-6 text-white/70">Write a custom message or press a button to refresh your greeting instantly.</p>
+          </div>
+
+          <div class="space-y-4">
+            <label class="block text-xs uppercase tracking-[0.28em] text-white/60" for="customMessage">Your message</label>
+            <input id="customMessage" type="text" placeholder="Say something sweet..." class="w-full rounded-3xl border border-white/15 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none transition focus:border-pink-300 focus:ring-2 focus:ring-pink-400/20" />
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button id="applyMessage" class="rounded-3xl bg-pink-500 px-5 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-pink-400">Update message</button>
+            <button id="randomMessage" class="rounded-3xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-white/20">Surprise me</button>
+          </div>
+
+          <div class="rounded-[28px] border border-white/10 bg-white/5 p-5 text-white/90">
+            <p id="heroMessage" class="text-lg leading-8">Love is the brightest code of all.</p>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-3xl border border-white/10 bg-white/10 p-5 text-center">
+              <p class="text-xs uppercase tracking-[0.28em] text-pink-200">Hearts</p>
+              <p id="heartCount" class="mt-3 text-3xl font-semibold text-white">Infinity</p>
+            </div>
+            <div class="rounded-3xl border border-white/10 bg-white/10 p-5 text-center">
+              <p class="text-xs uppercase tracking-[0.28em] text-cyan-200">Speed</p>
+              <p id="speedText" class="mt-3 text-3xl font-semibold text-white">Gentle</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const messages = [
+      "Your smile lights the page like neon.",
+      "Every line of code feels sweeter with you here.",
+      "This page sparkles because your name is on it.",
+      "Tailwind styling meets smooth JavaScript motion.",
+      "A fresh page for a brighter moment."
+    ];
+
+    const heroMessage = document.getElementById('heroMessage');
+    const randomButton = document.getElementById('randomMessage');
+    const applyButton = document.getElementById('applyMessage');
+    const customInput = document.getElementById('customMessage');
+    const heartCountLabel = document.getElementById('heartCount');
+    const speedText = document.getElementById('speedText');
+    const heartBurst = document.getElementById('heart-burst');
+
+    let heartTimer = null;
+
+    function pickMessage() {
+      return messages[Math.floor(Math.random() * messages.length)];
+    }
+
+    function updateHeroMessage(text) {
+      heroMessage.textContent = text;
+    }
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      const size = Math.random() * 18 + 22;
+      const left = Math.random() * 100;
+      heart.className = 'heart';
+      heart.textContent = '💕';
+      heart.style.left = `${left}%`;
+      heart.style.fontSize = `${size}px`;
+      heart.style.animationDuration = `${Math.random() * 4 + 8}s`;
+      heart.style.opacity = '0';
+      heartBurst.appendChild(heart);
+      setTimeout(() => heart.remove(), 12000);
+    }
+
+    function startHearts() {
+      if (heartTimer) {
+        clearInterval(heartTimer);
+      }
+      heartTimer = setInterval(createHeart, 600);
+      speedText.textContent = 'Gentle';
+      heartCountLabel.textContent = '∞';
+    }
+
+    randomButton.addEventListener('click', () => {
+      updateHeroMessage(pickMessage());
+    });
+
+    applyButton.addEventListener('click', () => {
+      const value = customInput.value.trim();
+      if (value) {
+        updateHeroMessage(value);
+        customInput.value = '';
+      }
+    });
+
+    updateHeroMessage('Love is the brightest code of all.');
+    startHearts();
+  </script>
 </body>
 </html>
