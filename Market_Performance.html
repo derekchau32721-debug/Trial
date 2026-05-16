@@ -2,43 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Market Performance Dashboard</title>
+  <title>📊 Market Performance Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
-  <h1 class="text-3xl font-bold text-center mb-6">📊 Market Performance Dashboard</h1>
-  
-  <div class="flex justify-center space-x-4 mb-6">
-    <button onclick="showTab('sector')" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition">Sector</button>
-    <button onclick="showTab('country')" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition">Country</button>
+<body class="min-h-screen bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-700 text-white p-8 font-sans">
+
+  <!-- Title -->
+  <h1 class="text-4xl font-extrabold text-center mb-10 tracking-wide drop-shadow-lg">
+    📊 Market Performance Dashboard
+  </h1>
+
+  <!-- Tab Buttons -->
+  <div class="flex justify-center space-x-6 mb-10">
+    <button onclick="showTab('sector')" 
+      class="px-6 py-3 rounded-xl bg-white/20 backdrop-blur-md shadow-md hover:bg-white/30 transition text-lg font-semibold">
+      Sector
+    </button>
+    <button onclick="showTab('country')" 
+      class="px-6 py-3 rounded-xl bg-white/20 backdrop-blur-md shadow-md hover:bg-white/30 transition text-lg font-semibold">
+      Country
+    </button>
   </div>
 
+  <!-- Content Panels -->
   <div id="sector" class="block"></div>
   <div id="country" class="hidden"></div>
 
   <script>
-    // Load Excel file
     async function loadExcel() {
       const response = await fetch("Market_Performance.xlsx");
       const arrayBuffer = await response.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
-      // Render Sector Performance
+      // Sector Performance
       const sectorSheet = workbook.Sheets["Sector Performance"];
       const sectorHTML = XLSX.utils.sheet_to_html(sectorSheet, { header: 1 });
       document.getElementById("sector").innerHTML = 
-        `<div class='bg-gray-800/70 backdrop-blur-md rounded-lg shadow-lg p-6 mb-8 overflow-x-auto'>${sectorHTML}</div>`;
+        `<div class='bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-10 overflow-x-auto border border-white/20'>
+          ${sectorHTML}
+        </div>`;
 
-      // Render Country Performance
+      // Country Performance
       const countrySheet = workbook.Sheets["Country Performance"];
       const countryHTML = XLSX.utils.sheet_to_html(countrySheet, { header: 1 });
       document.getElementById("country").innerHTML = 
-        `<div class='bg-gray-800/70 backdrop-blur-md rounded-lg shadow-lg p-6 mb-8 overflow-x-auto'>${countryHTML}</div>`;
+        `<div class='bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-10 overflow-x-auto border border-white/20'>
+          ${countryHTML}
+        </div>`;
     }
 
-    // Tab switching
     function showTab(tabId) {
       document.getElementById('sector').classList.add('hidden');
       document.getElementById('country').classList.add('hidden');
