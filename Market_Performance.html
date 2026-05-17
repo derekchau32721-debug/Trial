@@ -1,172 +1,33 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Market Performance Dashboard</title>
+  <meta charset="UTF-8">
+  <title>📊 Market Performance Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-  <style>
-    body {
-      background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 28%),
-        radial-gradient(circle at top right, rgba(168, 85, 247, 0.12), transparent 30%),
-        linear-gradient(135deg, #0f172a 0%, #111827 45%, #1e293b 100%);
-    }
-
-    .glass {
-      background: rgba(255, 255, 255, 0.10);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow:
-        0 8px 32px rgba(15, 23, 42, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-
-    .glass-soft {
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.10);
-    }
-
-    .tab-btn {
-      position: relative;
-      padding: 0.85rem 1.4rem;
-      border-radius: 9999px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      color: rgba(255,255,255,0.78);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: all 0.25s ease;
-    }
-
-    .tab-btn:hover {
-      color: white;
-      background: rgba(255,255,255,0.10);
-      transform: translateY(-1px);
-    }
-
-    .tab-btn.active {
-      color: white;
-      background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(168,85,247,0.25));
-      border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: 0 6px 20px rgba(59,130,246,0.20);
-    }
-
-    .sheet-wrap table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-      overflow: hidden;
-      border-radius: 1rem;
-      background: transparent;
-      color: white;
-      font-size: 0.95rem;
-    }
-
-    .sheet-wrap th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: rgba(15, 23, 42, 0.72);
-      color: rgba(255,255,255,0.92);
-      text-align: left;
-      font-weight: 700;
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.10);
-    }
-
-    .sheet-wrap td {
-      padding: 13px 16px;
-      color: rgba(255,255,255,0.82);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .sheet-wrap tr:hover td {
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.95);
-    }
-
-    .sheet-wrap tr:last-child td {
-      border-bottom: none;
-    }
-
-    .sheet-wrap {
-      overflow-x: auto;
-      border-radius: 1rem;
-    }
-
-    .panel {
-      animation: fadeIn 0.35s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    ::-webkit-scrollbar {
-      height: 10px;
-      width: 10px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-      border-radius: 999px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.18);
-      border-radius: 999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.28);
-    }
-  </style>
 </head>
+<body class="min-h-screen bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-700 text-white p-8 font-sans">
 
-<body class="min-h-screen text-white font-sans">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+  <!-- Title -->
+  <h1 class="text-4xl font-extrabold text-center mb-10 tracking-wide drop-shadow-lg">
+    📊 Market Performance Dashboard
+  </h1>
 
-    <!-- Header -->
-    <header class="glass rounded-3xl px-6 py-6 md:px-8 md:py-7 mb-8">
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <p class="text-sm uppercase tracking-[0.25em] text-white/55 mb-2">
-            Analytics Workspace
-          </p>
-          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
-            Market Performance Dashboard
-          </h1>
-          <p class="text-white/65 mt-2 text-sm md:text-base">
-            Compare performance by sector and country in a polished glass-style interface.
-          </p>
-        </div>
-
-        <div class="glass-soft rounded-2xl px-4 py-3 text-sm text-white/70">
-          Source: <span class="text-white font-medium">Market_Performance.xlsx</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Tabs -->
-    <div class="glass rounded-2xl p-3 inline-flex flex-wrap gap-3 mb-8">
-      <button id="tab-sector" onclick="showTab('sector')" class="tab-btn active">
-        Sector
-      </button>
-      <button id="tab-country" onclick="showTab('country')" class="tab-btn">
-        Country
-      </button>
-    </div>
-
-    <!-- Panels -->
-    <section id="sector" class="panel block"></section>
-    <section id="country" class="panel hidden"></section>
+  <!-- Tab Buttons -->
+  <div class="flex justify-center space-x-6 mb-10">
+    <button onclick="showTab('sector')" 
+      class="px-6 py-3 rounded-xl bg-white/20 backdrop-blur-md shadow-md hover:bg-white/30 transition text-lg font-semibold">
+      Sector
+    </button>
+    <button onclick="showTab('country')" 
+      class="px-6 py-3 rounded-xl bg-white/20 backdrop-blur-md shadow-md hover:bg-white/30 transition text-lg font-semibold">
+      Country
+    </button>
   </div>
+
+  <!-- Content Panels -->
+  <div id="sector" class="block"></div>
+  <div id="country" class="hidden"></div>
 
   <script>
     async function loadExcel() {
@@ -174,50 +35,27 @@
       const arrayBuffer = await response.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
-      renderSheet(
-        "Sector Performance",
-        "sector",
-        "Sector Performance",
-        "Performance breakdown across sectors."
-      );
+      // Sector Performance
+      const sectorSheet = workbook.Sheets["Sector Performance"];
+      const sectorHTML = XLSX.utils.sheet_to_html(sectorSheet, { header: 1 });
+      document.getElementById("sector").innerHTML = 
+        `<div class='bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-10 overflow-x-auto border border-white/20'>
+          ${sectorHTML}
+        </div>`;
 
-      renderSheet(
-        "Country Performance",
-        "country",
-        "Country Performance",
-        "Performance breakdown across countries."
-      );
-
-      function renderSheet(sheetName, targetId, title, subtitle) {
-        const sheet = workbook.Sheets[sheetName];
-        const html = XLSX.utils.sheet_to_html(sheet);
-
-        document.getElementById(targetId).innerHTML = `
-          <div class="glass rounded-3xl p-5 md:p-7 border border-white/10">
-            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
-              <div>
-                <h2 class="text-xl md:text-2xl font-semibold tracking-tight">${title}</h2>
-                <p class="text-white/60 text-sm mt-1">${subtitle}</p>
-              </div>
-            </div>
-
-            <div class="sheet-wrap glass-soft rounded-2xl p-2 md:p-3">
-              ${html}
-            </div>
-          </div>
-        `;
-      }
+      // Country Performance
+      const countrySheet = workbook.Sheets["Country Performance"];
+      const countryHTML = XLSX.utils.sheet_to_html(countrySheet, { header: 1 });
+      document.getElementById("country").innerHTML = 
+        `<div class='bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-10 overflow-x-auto border border-white/20'>
+          ${countryHTML}
+        </div>`;
     }
 
     function showTab(tabId) {
-      const tabs = ["sector", "country"];
-      tabs.forEach(id => {
-        document.getElementById(id).classList.add("hidden");
-        document.getElementById("tab-" + id).classList.remove("active");
-      });
-
-      document.getElementById(tabId).classList.remove("hidden");
-      document.getElementById("tab-" + tabId).classList.add("active");
+      document.getElementById('sector').classList.add('hidden');
+      document.getElementById('country').classList.add('hidden');
+      document.getElementById(tabId).classList.remove('hidden');
     }
 
     loadExcel();
