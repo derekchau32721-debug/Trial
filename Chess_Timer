@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess Timer v4</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --accent:#22c55e; --warn:#f59e0b; --text:#e5e7eb; --muted:#94a3b8; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:linear-gradient(180deg,#020617,#0f172a); color:var(--text); min-height:100vh; }
+    .wrap { max-width:720px; margin:0 auto; padding:16px; }
+    h1 { margin:0 0 12px; font-size:2rem; }
+    .grid { display:grid; gap:12px; grid-template-columns:1fr; }
+    .card { background:rgba(17,24,39,.92); border:1px solid rgba(148,163,184,.18); border-radius:18px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    label { display:block; font-size:.9rem; color:var(--muted); margin:10px 0 6px; }
+    input, button { width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(148,163,184,.22); background:#0b1220; color:var(--text); font-size:1rem; }
+    button { cursor:pointer; background:#1f2937; transition:.15s transform, .15s opacity, .15s background; min-height:46px; }
+    button:hover { transform:translateY(-1px); }
+    button.primary { background:var(--accent); color:#052e16; font-weight:700; border:none; min-height:52px; font-size:1.05rem; }
+    button.danger { background:#ef4444; color:white; border:none; }
+    button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    .players { display:grid; gap:12px; grid-template-columns:1fr; }
+    .player { border-radius:18px; padding:18px; border:1px solid rgba(148,163,184,.14); color:#fff; }
+    .player.active { outline:3px solid #fff; box-shadow:0 0 0 4px rgba(255,255,255,.08); }
+    .player.over { opacity:.55; }
+    .name { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; font-weight:700; }
+    .time { font-variant-numeric:tabular-nums; font-size:clamp(2.4rem, 6vw, 4.5rem); text-align:center; padding:16px 0 10px; }
+    .small { color:var(--muted); font-size:.92rem; }
+    .controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+    .top-actions { display:grid; grid-template-columns:1fr; gap:10px; margin-top:16px; }
+    .hidden { display:none !important; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:rgba(34,197,94,.15); color:#86efac; font-size:.8rem; }
+
+    @media (min-width: 700px) {
+      .wrap { max-width:1100px; padding:24px; }
+      .grid { grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+      .players { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+      .controls { grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+      .top-actions { grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Chess Timer v4</h1>
+    <p class="small">Set the number of players and the time limit per player, then tap the big button to pass turns.</p>
+
+    <div class="card" id="setupCard">
+      <div class="grid">
+        <div>
+          <label for="playerCount">Number of players</label>
+          <input id="playerCount" type="number" min="2" max="20" value="2" />
+        </div>
+        <div>
+          <label for="minutesPerHead">Time limit per head (minutes)</label>
+          <input id="minutesPerHead" type="number" min="1" max="999" value="5" />
+        </div>
+      </div>
+      <div id="namesWrap"></div>
+      <div class="top-actions">
+        <button class="primary" id="startBtn">Start game</button>
+        <button id="sampleBtn">Use 2 players / 5 min</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="gameCard">
+      <div class="name">
+        <span id="statusText">Player 1's turn</span>
+        <span class="pill" id="clockState">Running</span>
+      </div>
+      <div class="players" id="players"></div>
+      <div class="controls">
+        <button id="nextBtn" class="primary">Pass to next player</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resumeBtn" disabled>Resume</button>
+        <button id="resetBtn" class="danger">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const playerCountEl = document.getElementById('playerCount');
+      const minutesPerHeadEl = document.getElementById('minutesPerHead');
+      const startBtn = document.getElementById('startBtn');
+      const sampleBtn = document.getElementById('sampleBtn');
+      const setupCard = document.getElementById('setupCard');
+      const gameCard = document.getElementById('gameCard');
+      const namesWrap = document.getElementById('namesWrap');
+      const playersEl = document.getElementById('players');
+      const statusText = document.getElementById('statusText');
+      const clockState = document.getElementById('clockState');
+      const nextBtn = document.getElementById('nextBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const resumeBtn = document.getElementById('resumeBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let players = [];
+      let activeIndex = 0;
+      let timer = null;
+      let running = false;
+      let lastTick = null;
+
+      const palette = ['#2563eb','#7c3aed','#db2777','#f97316','#059669','#0891b2','#dc2626','#4f46e5','#16a34a','#ca8a04'];
+
+      const fmt = ms => {
+        ms = Math.max(0, ms);
+        const total = Math.ceil(ms / 1000);
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      };
+
+      function renderNameInputs() {
+        const count = Math.max(2, parseInt(playerCountEl.value || '2', 10));
+        namesWrap.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const row = document.createElement('div');
+          row.style.marginTop = '10px';
+          row.innerHTML = `<label for="name${i}">Player ${i + 1} name</label><input id="name${i}" type="text" placeholder="Player ${i + 1}" />`;
+          namesWrap.appendChild(row);
+        }
+      }
+
+      function render() {
+        playersEl.innerHTML = '';
+        players.forEach((p, i) => {
+          const div = document.createElement('div');
+          div.className = 'player' + (i === activeIndex ? ' active' : '') + (p.timeLeft <= 0 ? ' over' : '');
+          div.style.background = palette[i % palette.length];
+          div.innerHTML = `
+            <div class="name">
+              <span>${p.name}</span>
+              <span>${i === activeIndex && running && p.timeLeft > 0 ? 'Active' : ''}</span>
+            </div>
+            <div class="time">${fmt(p.timeLeft)}</div>
+            <div class="small">Or use the big pass button below</div>
+          `;
+          div.onclick = () => { if (running && i === activeIndex) switchTurn(); };
+          playersEl.appendChild(div);
+        });
+        const active = players[activeIndex];
+        statusText.textContent = active ? `${active.name}'s turn` : 'Ready';
+        clockState.textContent = running ? 'Running' : (players.length ? 'Paused' : 'Ready');
+        pauseBtn.disabled = !running;
+        resumeBtn.disabled = running || !players.length;
+        nextBtn.disabled = !running;
+      }
+
+      function startGame() {
+        const count = Math.max(2, parseInt(playerCountEl.value || '2', 10));
+        const mins = Math.max(1, parseInt(minutesPerHeadEl.value || '5', 10));
+        const names = Array.from({length: count}, (_, i) => {
+          const el = document.getElementById('name' + i);
+          return (el && el.value.trim()) ? el.value.trim() : `Player ${i + 1}`;
+        });
+        players = Array.from({length: count}, (_, i) => ({ name: names[i], timeLeft: mins * 60 * 1000 }));
+        activeIndex = 0;
+        setupCard.classList.add('hidden');
+        gameCard.classList.remove('hidden');
+        running = true;
+        lastTick = Date.now();
+        clearInterval(timer);
+        timer = setInterval(tick, 100);
+        render();
+      }
+
+      function tick() {
+        if (!running) return;
+        const now = Date.now();
+        const delta = now - lastTick;
+        lastTick = now;
+        const p = players[activeIndex];
+        if (!p || p.timeLeft <= 0) return;
+        p.timeLeft -= delta;
+        if (p.timeLeft <= 0) {
+          p.timeLeft = 0;
+          running = false;
+          clearInterval(timer);
+          clockState.textContent = 'Time up';
+        }
+        render();
+      }
+
+      function switchTurn() {
+        const current = players[activeIndex];
+        if (!current || current.timeLeft <= 0) return;
+        activeIndex = (activeIndex + 1) % players.length;
+        lastTick = Date.now();
+        render();
+      }
+
+      function pauseGame() { running = false; clearInterval(timer); render(); }
+      function resumeGame() { if (!players.length) return; running = true; lastTick = Date.now(); clearInterval(timer); timer = setInterval(tick, 100); render(); }
+      function resetGame() { clearInterval(timer); players = []; activeIndex = 0; running = false; gameCard.classList.add('hidden'); setupCard.classList.remove('hidden'); render(); }
+
+      playerCountEl.addEventListener('input', renderNameInputs);
+      startBtn.addEventListener('click', startGame);
+      sampleBtn.addEventListener('click', () => { playerCountEl.value = 2; minutesPerHeadEl.value = 5; renderNameInputs(); startGame(); });
+      nextBtn.addEventListener('click', () => { if (running) switchTurn(); });
+      pauseBtn.addEventListener('click', pauseGame);
+      resumeBtn.addEventListener('click', resumeGame);
+      resetBtn.addEventListener('click', resetGame);
+      renderNameInputs();
+      render();
+    });
+  </script>
+</body>
+</html>
